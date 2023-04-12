@@ -1,0 +1,1 @@
+insert into games(id,name,price) values ('a2c525cf-399d-4da7-8faf-d374e10aeadf','Warhammer Vermintide 2',30.0)
