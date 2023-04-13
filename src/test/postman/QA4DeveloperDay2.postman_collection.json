@@ -1,0 +1,188 @@
+{
+	"info": {
+		"_postman_id": "8702d040-09df-4677-99f4-0bffc34d0eca",
+		"name": "QA4DeveloperDay2",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "668636"
+	},
+	"item": [
+		{
+			"name": "get all games",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let schema ={\r",
+							"  \"$schema\": \"http://json-schema.org/draft-04/schema#\",\r",
+							"  \"type\": \"object\",\r",
+							"  \"properties\": {\r",
+							"    \"games\": {\r",
+							"      \"type\": \"array\",\r",
+							"      \"items\": [\r",
+							"        {\r",
+							"          \"type\": \"object\",\r",
+							"          \"properties\": {\r",
+							"            \"id\": {\r",
+							"              \"type\": \"string\"\r",
+							"            },\r",
+							"            \"name\": {\r",
+							"              \"type\": \"string\"\r",
+							"            },\r",
+							"            \"price\": {\r",
+							"              \"type\": \"number\"\r",
+							"            }\r",
+							"          },\r",
+							"          \"required\": [\r",
+							"            \"id\",\r",
+							"            \"name\",\r",
+							"            \"price\"\r",
+							"          ]\r",
+							"        }\r",
+							"      ]\r",
+							"    }\r",
+							"  },\r",
+							"  \"required\": [\r",
+							"    \"games\"\r",
+							"  ]\r",
+							"};\r",
+							"\r",
+							"tv4.addSchema('gameSchema',schema);\r",
+							"\r",
+							"pm.test(\"response has to have a 200 status\",()=>{\r",
+							"    pm.response.to.have.status(200)\r",
+							"})\r",
+							"pm.test(\"response has to have a json body\",()=>{\r",
+							"    pm.response.to.be.withBody;\r",
+							"    pm.response.to.be.json;\r",
+							"})\r",
+							"pm.test(\"response must match with given json schema\",()=>{\r",
+							"    pm.expect(tv4.validate(pm.response.json(),schema)).to.be.true;\r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/games",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"games"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create game",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let schema = {\r",
+							"  \"$schema\": \"http://json-schema.org/draft-04/schema#\",\r",
+							"  \"type\": \"object\",\r",
+							"  \"properties\": {\r",
+							"    \"gameId\": {\r",
+							"      \"type\": \"string\"\r",
+							"    }\r",
+							"  },\r",
+							"  \"required\": [\r",
+							"    \"gameId\"\r",
+							"  ]\r",
+							"};\r",
+							"\r",
+							"tv4.addSchema(\"gameResponseSchema\",schema);\r",
+							"\r",
+							"pm.test(\"result have a json body and has status created\",()=>{\r",
+							"     pm.response.to.have.status(201);\r",
+							"     pm.response.to.be.withBody;\r",
+							"     pm.response.to.be.json;\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\":\"Zelda, Link's awakening\",\r\n    \"price\":20\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/games",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"games"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "if you try to create the same will fail",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"must return an error without body\",()=>{\r",
+							"    pm.response.to.be.error\r",
+							"    pm.expect(pm.response.body).undefined\r",
+							"})\r",
+							"\r",
+							"pm.test(\"petition has to have 400 status\",() => {\r",
+							"    pm.response.to.be.error\r",
+							"    pm.response.to.have.status(400)\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\":\"Zelda, Link's awakening\",\r\n    \"price\":20\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/games",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"games"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

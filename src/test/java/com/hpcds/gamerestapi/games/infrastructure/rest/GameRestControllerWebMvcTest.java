@@ -5,7 +5,12 @@ import com.hpcds.gamerestapi.games.infrastructure.rest.dtos.GameCreationResponse
 import com.hpcds.gamerestapi.games.infrastructure.rest.dtos.GameQueryResponse;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,12 +18,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import javax.sql.DataSource;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -49,17 +56,11 @@ public class GameRestControllerWebMvcTest {
         assertThat(responseAsJavaObject.getGames().size())
                 .isGreaterThanOrEqualTo(1);
     }
-
-    @Test
+    @ValueSource(strings = "game_creation_petition.json")
     @DisplayName("when you create a game save it in database, and status is 201 and return the id wrapped in a json")
-    void check_if_save_a_game_in_database() throws Exception {
-        val givenInput = """
-                {
-                    "name":"Orpheus",
-                    "price": 10.5
-                }
-                """;
-
+    @ParameterizedTest
+    void check_if_save_a_game_in_database(String filePath) throws Exception {
+        val givenInput = readFileAsSingleString(filePath);
         val result = mockMvc.perform(
                 post("/games")
                         .content(givenInput)
@@ -91,13 +92,22 @@ public class GameRestControllerWebMvcTest {
     void check_if_game_exists_in_database(TestInfo testInfo) throws Exception {
         try(
                 val connection = dataSource.getConnection();
-                val statement = connection.prepareStatement("delete from games where name = ?");
+                val statement = connection.prepareStatement("delete from games where name = ?")
         ){
             statement.setString(1,"Orpheus");
             val result = statement.executeUpdate();
 
             log.atInfo().log("test: {} se han eliminado: {}",testInfo.getDisplayName(),result);
 
+        }
+    }
+
+    public static String readFileAsSingleString(String fileName){
+        try (var lineStream = Files.lines(Paths.get(ClassLoader.getSystemResource(fileName).toURI()))) {
+            return lineStream.collect(Collectors.joining("\n"));
+        } catch (Exception e) {
+            fail(e);
+            throw new RuntimeException(e);
         }
     }
 }
